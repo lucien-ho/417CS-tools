@@ -1,0 +1,409 @@
+--- a/desktop/src-tauri/src/lib.rs
++++ b/desktop/src-tauri/src/lib.rs
+@@ -9,7 +9,7 @@
+ //! 再投影给 formal gateway、scratch 和前端；展示模板不再决定 adapter/鉴权/transport。
+ //!
+ //! 铁律相关：API key 只在内存与 0600 的 config.json，OAuth token 只在 CSSwitch 私有认证文件；回显前端只给掩码/脱敏状态；沙箱端口/目录护栏
+-//! 由被调脚本负责（对 8765 与真实目录失败关闭）；关窗只隐藏，显式退出停代理与沙箱。
++//! 由被调脚本负责（对 8765 与真实目录失败关闭）；关窗保留后台，显式退出停代理与沙箱。
+ 
+ mod codex_auth_supervisor;
+ mod commands;
+@@ -22,6 +22,7 @@
+ mod proc;
+ mod provider_contracts;
+ mod platform;
++mod panel;
+ mod runtime;
+ mod scratch;
+ mod templates;
+@@ -480,10 +481,7 @@
+ }
+ 
+ fn show_main_window<R: tauri::Runtime>(app: &tauri::AppHandle<R>) {
+-    if let Some(win) = app.get_webview_window("main") {
+-        let _ = win.show();
+-        let _ = win.set_focus();
+-    }
++    panel::show(app);
+ }
+ 
+ fn install_menu(app: &tauri::App) -> tauri::Result<()> {
+@@ -1038,6 +1036,8 @@
+ // ---------- 入口 ----------
+ #[cfg_attr(mobile, tauri::mobile_entry_point)]
+ pub fn run() {
++    let mut context = tauri::generate_context!();
++    panel::configure_context(&mut context);
+     let app = tauri::Builder::default()
+         .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
+             run_second_instance_callback(app);
+@@ -1047,6 +1047,7 @@
+         .manage(Arc::new(Mutex::new(AppState::default())))
+         .manage(Arc::new(lifecycle::Lifecycle::new()))
+         .manage(Arc::new(CodexAuthSupervisor::default()))
++        .manage(panel::PanelState::default())
+         .invoke_handler(tauri::generate_handler![
+             commands::codex::set_experimental_codex_enabled,
+             commands::codex::set_codex_network,
+@@ -1099,31 +1100,24 @@
+             let config_dir = config::default_dir();
+             run_startup_config_sequence(
+                 &config_dir,
+-                || {
+-                    // 关窗隐藏配置面板，不销毁窗口、不停止后台链路。显式退出清理代理与沙箱。
+-                    if let Some(win) = app.get_webview_window("main") {
+-                        let w = win.clone();
+-                        win.on_window_event(move |ev| {
+-                            if let tauri::WindowEvent::CloseRequested { api, .. } = ev {
+-                                api.prevent_close();
+-                                let _ = w.hide();
+-                            }
+-                        });
+-                    }
+-                },
++                || panel::install_close_handler(app.handle()),
+                 || run_boot_coordinator(app.handle().clone()),
+             );
+             start_science_runtime_update_scheduler(app.handle().clone());
+             Ok(())
+         })
+-        .build(tauri::generate_context!())
++        .build(context)
+         .expect("error while building tauri application");
+ 
+     app.run(|app, event| match event {
+         // Reopen is the macOS dock-click event; the variant only exists there.
+         #[cfg(target_os = "macos")]
+         tauri::RunEvent::Reopen { .. } => show_main_window(app),
+-        tauri::RunEvent::ExitRequested { api, .. } => {
++        tauri::RunEvent::ExitRequested { api, code, .. } => {
++            if panel::keep_background_running(code) {
++                api.prevent_exit();
++                return;
++            }
+             if matches!(
+                 run_native_exit_event(app, NativeExitEvent::ExitRequested),
+                 GatewayStopOutcome::Uncertain { .. }
+--- a/desktop/src-tauri/src/panel.rs
++++ b/desktop/src-tauri/src/panel.rs
+@@ -0,0 +1,176 @@
++//! Settings-window lifetime is independent of the managed background services.
++
++use tauri::Manager;
++
++#[derive(Default)]
++pub(crate) struct PanelState {
++    #[cfg(windows)]
++    inner: std::sync::Mutex<windows::PanelInner>,
++}
++
++pub(crate) fn configure_context<R: tauri::Runtime>(context: &mut tauri::Context<R>) {
++    #[cfg(windows)]
++    for window in &mut context.config_mut().app.windows {
++        if window.label == "main" {
++            window.create = false;
++        }
++    }
++    #[cfg(not(windows))]
++    let _ = context;
++}
++
++pub(crate) fn show<R: tauri::Runtime>(app: &tauri::AppHandle<R>) {
++    #[cfg(windows)]
++    {
++        let dispatcher = app.clone();
++        // Always enqueue, even when called on the main thread: close() queues
++        // its native event, while run_on_main_thread otherwise runs inline.
++        tauri::async_runtime::spawn_blocking(move || {
++            let handle = dispatcher.clone();
++            if dispatcher.run_on_main_thread(move || windows::request_open(handle)).is_err() {
++                eprintln!("CSSWITCH_PANEL_ERROR stage=dispatch");
++            }
++        });
++    }
++    #[cfg(not(windows))]
++    if let Some(window) = app.get_webview_window("main") {
++        let _ = window.show();
++        let _ = window.set_focus();
++    }
++}
++
++#[cfg(windows)]
++pub(crate) fn current_window<R: tauri::Runtime>(app: &tauri::AppHandle<R>) -> Option<tauri::WebviewWindow<R>> {
++    let label = app.state::<PanelState>().inner.lock().unwrap_or_else(|e| e.into_inner())
++        .active.as_ref().map(|active| active.label.clone())?;
++    app.get_webview_window(&label)
++}
++
++#[cfg(windows)]
++mod windows {
++    use super::*;
++
++    #[derive(Clone, Copy, PartialEq)]
++    enum Phase { Opening, Open, Closing }
++
++    pub(super) struct ActivePanel {
++        pub(super) label: String,
++        phase: Phase,
++    }
++
++    #[derive(Default)]
++    pub(super) struct PanelInner {
++        next: u64,
++        pub(super) active: Option<ActivePanel>,
++        reopen: bool,
++    }
++
++    pub(super) fn request_open<R: tauri::Runtime>(app: tauri::AppHandle<R>) {
++        let Some(mut config) = app.config().app.windows.iter().find(|w| w.label == "main").cloned() else {
++            eprintln!("CSSWITCH_PANEL_ERROR stage=missing_config");
++            return;
++        };
++        {
++            let state = app.state::<PanelState>();
++            let mut inner = state.inner.lock().unwrap_or_else(|e| e.into_inner());
++            if let Some(active) = &inner.active {
++                match active.phase {
++                    Phase::Closing => { inner.reopen = true; return; }
++                    Phase::Opening => return,
++                    Phase::Open => {
++                        drop(inner);
++                        if let Some(window) = current_window(&app) {
++                            let _ = window.show();
++                            let _ = window.set_focus();
++                        }
++                        return;
++                    }
++                }
++            }
++            inner.next += 1;
++            // Tauri can retain a registered handle after asynchronous native
++            // creation fails. Never reuse that label for a subsequent attempt.
++            config.label = format!("csswitch-settings-{}", inner.next);
++            config.visible = false;
++            inner.active = Some(ActivePanel { label: config.label.clone(), phase: Phase::Opening });
++        }
++        // WebView2 construction must not block the native event/IPC thread.
++        tauri::async_runtime::spawn_blocking(move || {
++            let result = tauri::WebviewWindowBuilder::from_config(&app, &config)
++                .and_then(|builder| builder.build())
++                // build() only queues creation. This getter confirms the native
++                // window exists after that message has been processed.
++                .and_then(|window| window.is_visible().map(|_| window));
++            if let Ok(window) = &result {
++                let event_app = app.clone();
++                let label = config.label.clone();
++                window.on_window_event(move |event| {
++                    let mut reopen = false;
++                    {
++                        let state = event_app.state::<PanelState>();
++                        let mut inner = state.inner.lock().unwrap_or_else(|e| e.into_inner());
++                        if !inner.active.as_ref().is_some_and(|p| p.label == label) { return; }
++                        match event {
++                            tauri::WindowEvent::CloseRequested { .. } => {
++                                inner.active.as_mut().unwrap().phase = Phase::Closing;
++                            }
++                            tauri::WindowEvent::Destroyed => {
++                                inner.active = None;
++                                reopen = std::mem::take(&mut inner.reopen);
++                            }
++                            _ => {}
++                        }
++                    }
++                    if reopen { show(&event_app); }
++                });
++            }
++            let finished_app = app.clone();
++            if app.run_on_main_thread(move || {
++                let state = finished_app.state::<PanelState>();
++                let mut inner = state.inner.lock().unwrap_or_else(|e| e.into_inner());
++                if !inner.active.as_ref().is_some_and(|p| p.label == config.label && p.phase == Phase::Opening) {
++                    drop(inner);
++                    if let Ok(window) = result { let _ = window.destroy(); }
++                    return;
++                }
++                match result {
++                    Ok(window) => {
++                        inner.active.as_mut().unwrap().phase = Phase::Open;
++                        drop(inner);
++                        if window.show().is_err() || window.set_focus().is_err() {
++                            eprintln!("CSSWITCH_PANEL_ERROR stage=show");
++                        }
++                    }
++                    Err(_) => {
++                        inner.active = None;
++                        eprintln!("CSSWITCH_PANEL_ERROR stage=native_create");
++                    }
++                }
++            }).is_err() {
++                eprintln!("CSSWITCH_PANEL_ERROR stage=completion_dispatch");
++            }
++        });
++    }
++}
++
++pub(crate) fn install_close_handler<R: tauri::Runtime>(app: &tauri::AppHandle<R>) {
++    // Windows uses the normal close/destroy path, releasing its WebView2.
++    #[cfg(not(windows))]
++    if let Some(window) = app.get_webview_window("main") {
++        let hidden = window.clone();
++        window.on_window_event(move |event| {
++            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
++                api.prevent_close();
++                let _ = hidden.hide();
++            }
++        });
++    }
++    #[cfg(windows)]
++    let _ = app;
++}
++
++pub(crate) fn keep_background_running(exit_code: Option<i32>) -> bool {
++    // None means the last window closed. app.exit/restart supplies a code and
++    // must still reach the existing native-exit cleanup owner.
++    cfg!(windows) && exit_code.is_none()
++}
+--- a/desktop/src-tauri/examples/windows_panel_lifecycle.rs
++++ b/desktop/src-tauri/examples/windows_panel_lifecycle.rs
+@@ -0,0 +1,108 @@
++//! Isolated native regression: no provider, Science, config or user data access.
++//! Run with WEBVIEW2_USER_DATA_FOLDER pointing at a new temporary directory.
++//! Cargo examples need the application's Windows manifest embedded before run.
++
++#[cfg(windows)]
++#[path = "../src/panel.rs"]
++mod panel;
++
++#[cfg(windows)]
++fn main() {
++    use std::sync::{atomic::{AtomicBool, AtomicUsize, Ordering}, Arc};
++    use std::time::{Duration, Instant};
++    use tauri::Manager;
++
++    assert!(std::env::var_os("WEBVIEW2_USER_DATA_FOLDER").is_some(), "isolated WebView2 folder required");
++    assert!(panel::keep_background_running(None));
++    assert!(!panel::keep_background_running(Some(0)));
++    assert!(!panel::keep_background_running(Some(1)));
++    assert!(!panel::keep_background_running(Some(tauri::RESTART_EXIT_CODE)));
++    std::thread::spawn(|| {
++        std::thread::sleep(Duration::from_secs(50));
++        eprintln!("FAIL: lifecycle test timed out");
++        std::process::exit(2);
++    });
++    let mut context = tauri::generate_context!();
++    context.config_mut().identifier = "com.csswitch.panel-lifecycle-test".into();
++    for window in &mut context.config_mut().app.windows {
++        window.url = tauri::WebviewUrl::External("about:blank".parse().unwrap());
++        window.title = "CSSwitch isolated lifecycle test".into();
++    }
++    panel::configure_context(&mut context);
++    let app = tauri::Builder::default()
++        .manage(panel::PanelState::default())
++        .build(context)
++        .expect("build isolated fixture");
++    panel::install_close_handler(app.handle());
++    let ready = Arc::new(AtomicBool::new(false));
++    let worker_ready = ready.clone();
++    let closes = Arc::new(AtomicUsize::new(0));
++    let explicit_exits = Arc::new(AtomicUsize::new(0));
++    let worker_closes = closes.clone();
++    let handle = app.handle().clone();
++    std::thread::spawn(move || {
++        let wait = |condition: &dyn Fn() -> bool| {
++            let started = Instant::now();
++            while !condition() {
++                assert!(started.elapsed() < Duration::from_secs(12), "window transition timed out");
++                std::thread::sleep(Duration::from_millis(50));
++            }
++        };
++        wait(&|| worker_ready.load(Ordering::SeqCst));
++        // Exercise an actual WebView2 creation failure, not just config validation.
++        let invalid_runtime = std::env::current_dir().unwrap().join("missing_webview_runtime");
++        std::env::set_var("WEBVIEW2_BROWSER_EXECUTABLE_FOLDER", &invalid_runtime);
++        panel::show(&handle);
++        wait(&|| !handle.webview_windows().is_empty() && panel::current_window(&handle).is_none());
++        std::env::remove_var("WEBVIEW2_BROWSER_EXECUTABLE_FOLDER");
++        println!("PASS: native creation failure returned control for a fresh retry");
++        for cycle in 1..=2 {
++            // This is the same show path called by boot and single-instance callbacks.
++            for _ in 0..4 {
++                panel::show(&handle);
++            }
++            wait(&|| panel::current_window(&handle).is_some_and(|w| w.is_visible().unwrap_or(false)));
++            std::thread::sleep(Duration::from_millis(500));
++            assert_eq!(handle.webview_windows().values().filter(|w| w.is_visible().is_ok()).count(), 1);
++            if cycle == 2 {
++                let previous = panel::current_window(&handle).unwrap().label().to_owned();
++                let overlap_app = handle.clone();
++                handle.run_on_main_thread(move || {
++                    panel::current_window(&overlap_app).unwrap().close().unwrap();
++                    panel::show(&overlap_app);
++                }).unwrap();
++                wait(&|| panel::current_window(&handle).is_some_and(|w| w.label() != previous && w.is_visible().unwrap_or(false)));
++                println!("PASS: open request during close produced a replacement panel");
++            }
++            panel::current_window(&handle).unwrap().close().unwrap();
++            wait(&|| panel::current_window(&handle).is_none() && worker_closes.load(Ordering::SeqCst) >= cycle);
++            std::thread::sleep(Duration::from_millis(700));
++            println!("PASS: cycle {cycle} opened one panel, destroyed it, and kept the host alive");
++        }
++        handle.exit(0);
++    });
++    let observed_exits = explicit_exits.clone();
++    let code = app.run_return(move |app, event| {
++        if matches!(event, tauri::RunEvent::Ready) {
++            assert!(app.webview_windows().is_empty(), "background startup created a WebView");
++            println!("PASS: completed background startup has zero WebViews");
++            ready.store(true, Ordering::SeqCst);
++        }
++        if let tauri::RunEvent::ExitRequested { api, code, .. } = event {
++            if panel::keep_background_running(code) {
++                closes.fetch_add(1, Ordering::SeqCst);
++                api.prevent_exit();
++            } else {
++                observed_exits.fetch_add(1, Ordering::SeqCst);
++            }
++        }
++    });
++    assert_eq!(code, 0);
++    assert_eq!(explicit_exits.load(Ordering::SeqCst), 1);
++    println!("PASS: explicit exit reached the exit branch and terminated normally");
++}
++
++#[cfg(not(windows))]
++fn main() {
++    eprintln!("Windows-only native lifecycle regression");
++}
+--- a/desktop/src-tauri/capabilities/default.json
++++ b/desktop/src-tauri/capabilities/default.json
+@@ -2,7 +2,7 @@
+   "$schema": "../gen/schemas/desktop-schema.json",
+   "identifier": "default",
+   "description": "Capability for the main window",
+-  "windows": ["main"],
++  "windows": ["main", "csswitch-settings-*"],
+   "permissions": [
+     "core:default",
+     "dialog:allow-open",
+--- a/docs/architecture/desktop-control-plane.md
++++ b/docs/architecture/desktop-control-plane.md
+@@ -182,7 +182,17 @@
+   connector 与 managed prompt，但不会启动受管 Science 或正式 Gateway 服务。两个 command 各自返回 typed result；frontend
+   每个动作只提交一个 intent 并渲染 `status/message`，不串联或编排事务。Doctor/repair
+   结果都不等于 provider、Science、artifact、installed 或 live 验收。
+-- 关闭窗口只隐藏；frontend 显式 `quit_app` 由
++- Windows 设置窗口由 `desktop/src-tauri/src/panel.rs` 按需创建；auto-boot 成功时不创建隐藏的
++  WebView2，关闭面板使用正常销毁路径以释放界面资源，未保存的表单状态随窗口销毁。
++  再次运行启动器沿既有 single-instance callback 打开面板；请求与关闭事件在主线程排序，
++  创建在后台执行并用原生 getter 确认，关闭中的打开请求保留至销毁完成。Windows 使用
++  `csswitch-settings-*` 单调标签及与 main 相同的本地 capability，避免 Tauri 在原生创建
++  失败后遗留的注册句柄阻止重试；不更改允许的 IPC 权限或远程来源。其他平台仍保持关闭隐藏行为。
++  `panel.rs` 只拥有窗口配置、创建和关闭策略，不拥有 Gateway/Science 状态或停止权限；
++  创建失败仅报告固定阶段码，后台服务继续由既有 owner 管理，后续打开可重试。
++  Windows 最后窗口关闭产生的 `ExitRequested { code: None }` 仅阻止事件循环退出，
++  不进入 native-exit cleanup；显式 `app.exit` / restart 的带 code 事件仍执行原清理路径。
++  frontend 显式 `quit_app` 由
+   `commands/runtime/lifecycle.rs` 复用完整 `stop_all` 边界，只有停止成功才退出。
+   macOS/Tauri `RunEvent::Exit*` 则是 `desktop/src-tauri/src/lib.rs` 拥有的独立 native-exit
+   cleanup path，不是 frontend command caller；它保留 best-effort policy，Science stop

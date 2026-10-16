@@ -1,6 +1,6 @@
 {
-  "package": "0.8.4-winshare.20261013",
-  "basis": "Installed repaired Windows binaries; no clean source-release claim.",
+  "package": "0.8.4-winshare.20261017",
+  "basis": "20261013 custom Windows distribution with the validated settings-window lifecycle repair; not a clean upstream source release.",
   "files": [
     {
       "path": "CSSwitch-Launcher.exe",
@@ -104,8 +104,8 @@
     },
     {
       "path": "desktop.exe",
-      "bytes": 21809152,
-      "sha256": "2fd28ac303d35b4c0b70d926107de90b1b720bb441cccac18f8f1dced2be930e"
+      "bytes": 21899776,
+      "sha256": "efce9cab66fd4b834dc9b439ce2eccfd4539fc710e60bc623d0e77e0fc830a29"
     },
     {
       "path": "prerequisites/MicrosoftEdgeWebview2Setup.exe",
@@ -144,13 +144,17 @@
     },
     {
       "path": "使用说明.txt",
-      "bytes": 1809,
-      "sha256": "7732fde5e804606818fa5dfb430767dee518993b1e0516d0e2cd61937d845add"
+      "bytes": 3120,
+      "sha256": "dbc3ea03f6b699098d2cb861c0b1955a8c4064e33c37ec1949c625bfdc853f76"
     },
     {
       "path": "安装包标识.txt",
       "bytes": 29,
       "sha256": "7bfc8a59102c767b432026965d5b0c04f9cc17d7514a73203761237fd01ccdd2"
     }
-  ]
+  ],
+  "installer_version": "0.8.4.1017",
+  "release_date": "2026-10-17",
+  "compatibility_filename": "CSSwitch-0.8.4-Windows-x64-20261013-Setup.exe",
+  "unchanged_launcher_version": "0.8.4-winshare.20261013"
 }

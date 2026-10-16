@@ -1,36 +1,35 @@
 {
-  "date": "2026-10-13",
-  "package": "CSSwitch 0.8.4 Windows custom distribution",
-  "installed_program_unchanged": true,
+  "date": "2026-10-17",
+  "package": "0.8.4-winshare.20261017",
+  "installer_version": "0.8.4.1017",
+  "installer_sha256": "81a302d50d5c6d19197f311fe3f494717d9d0e443585ad7cfcff9f5a3a08ca2a",
+  "desktop_sha256": "efce9cab66fd4b834dc9b439ce2eccfd4539fc710e60bc623d0e77e0fc830a29",
   "payload_allowlist_count": 30,
   "private_profile_files_included": false,
-  "creator_specific_paths_in_text_payload": false,
+  "packaging_test_mode": "Isolated /TESTMODE; no real installation, browser registration, shortcuts or prerequisite changes.",
   "checks": [
     {
+      "name": "published_old_installer_installs_in_isolation",
+      "pass": true
+    },
+    {
+      "name": "upgrade_from_published_old_installer",
+      "pass": true
+    },
+    {
       "name": "silent_install_custom_unicode_directory",
-      "pass": true,
-      "exit": 0
+      "pass": true
     },
     {
       "name": "all_installed_payload_hashes",
       "pass": true,
       "files": 30,
-      "mismatches": []
+      "desktop_sha256": "efce9cab66fd4b834dc9b439ce2eccfd4539fc710e60bc623d0e77e0fc830a29"
     },
     {
-      "name": "launcher_uses_current_user_not_creator_drive",
+      "name": "other_published_payload_files_unchanged",
       "pass": true,
-      "diagnostic": {
-        "version": "0.8.4-winshare.20261013",
-        "gatewayPresent": true,
-        "vcRuntime": true,
-        "webView2": true,
-        "x64": true
-      }
-    },
-    {
-      "name": "original_binary_identity_preserved",
-      "pass": true
+      "files": 28
     },
     {
       "name": "unrelated_directory_rejected",
@@ -38,43 +37,37 @@
       "exit": 4
     },
     {
-      "name": "launcher_child_environment_and_no_forced_autostart",
+      "name": "uninstall_upgraded_preserves_user_files",
       "pass": true
     },
     {
-      "name": "upgrade_preserves_unmanaged_files",
+      "name": "uninstall_fresh_preserves_user_files",
       "pass": true
     },
     {
-      "name": "native_helper_selftest",
-      "pass": true
-    },
-    {
-      "name": "native_helper_framing",
-      "pass": true
-    },
-    {
-      "name": "plugin_installer_portable_paths",
+      "name": "installer_version",
       "pass": true,
-      "exit": 0
-    },
-    {
-      "name": "unchanged_extension_core_and_background_tests",
-      "pass": true
-    },
-    {
-      "name": "uninstall_preserves_user_files",
-      "pass": true
-    },
-    {
-      "name": "optional_plugin_not_auto_registered",
-      "pass": true
+      "version": "0.8.4.1017"
     }
   ],
+  "repair_validation_completed_before_packaging": {
+    "windows_release_build": "PASS",
+    "isolated_native_window_lifecycle": "PASS: after-Ready no WebView, native creation failure and retry, repeated open/close, reopen during close, explicit exit",
+    "independent_review_rounds": 2,
+    "final_independent_review": "PASS, no findings",
+    "edge_local_audio_runs_seconds": [
+      45,
+      45,
+      30
+    ],
+    "new_edge_dumps_during_audio_checks": 0,
+    "user_confirmed_bilibili_and_youtube_after_closing_settings": true
+  },
   "limitations": [
-    "No full clean-second-PC Science/provider/SSH end-to-end run.",
-    "Installer is not Authenticode signed.",
-    "Microsoft dependency installers verified signed; fresh-machine dependency installation not exercised on this configured PC.",
-    "Core binaries are current repaired installed artifacts, not a new upstream source release."
+    "The underlying Windows/Chromium compatibility mechanism is not fully proven; short regression checks do not prove permanent resolution on all computers.",
+    "No full cross-platform suite, fresh-second-PC Science/provider/SSH end-to-end test, or real model request test.",
+    "Installer is not Authenticode signed; fresh-machine dependency installation was not exercised.",
+    "Desktop is a validated custom build. The included incremental patch does not contain earlier local customizations.",
+    "Portable launcher is unchanged and its own diagnostic version remains 0.8.4-winshare.20261013."
   ]
 }

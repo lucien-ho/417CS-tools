@@ -1,20 +1,31 @@
-﻿CSSwitch Windows 分享安装包 — 2026-10-13
+CSSwitch Windows 分享安装包 — 2026-10-17 修复版
 
-适用：Windows 11 x64。包含当前已修复的 CSSwitch 0.8.4 程序，以及可选的 Science 中文插件 1.1.0。
+适用：Windows 11 x64。CSSwitch 0.8.4 定制版，包版本 0.8.4-winshare.20261017，安装器版本 0.8.4.1017；包含可选 Science 中文插件 1.1.0。
+为保持原下载链接，目录和安装包文件名保留 20261013；其中内容已替换为 2026-10-17 修复版，请以 package-manifest.json 和 SHA256SUMS.txt 为准。
+
+已有用户升级：
+1. 保存设置和 Science 中未完成的工作，再在 CSSwitch 中选择“退出 CSSwitch”，等待后台退出。仅点设置窗口右上角 × 会保留后台，不能代替完整退出。
+2. 运行本安装器，选择原分享版的安装目录覆盖安装。安装器会拒绝正在使用或不属于此分享包的非空目录；此时先完整退出原程序，或另选空目录。
+3. 使用开始菜单或桌面的 CSSwitch 入口重新启动。如提示 18991 被未知或旧 listener 占用，请先正常退出旧实例；不要强行结束身份不明的进程或关闭端口身份保护。
 
 首次使用：
-1. 运行 CSSwitch-0.8.4-Windows-x64-20261013-Setup.exe，按提示安装。安装目录可选，默认在当前用户 LocalAppData\Programs\CSSwitch。
+1. 运行 CSSwitch-0.8.4-Windows-x64-20261013-Setup.exe。默认安装到当前用户 LocalAppData\Programs\CSSwitch，也可选择其他空目录。
 2. 安装程序按需运行微软 VC++ 和 WebView2 安装组件。VC++ 可能需要管理员确认；WebView2 缺失时需要联网下载运行时。
-3. 从 Claude Science 官方页面 https://claude.com/product/claude-science 安装 Windows 版本。本包不包含 Science 安装程序或他人的 Science 数据。
-4. 从开始菜单或桌面打开 CSSwitch，填写你自己的服务地址、API key 和模型，保存后使用一键启动。
-5. 想用中文和外部打开功能，再打开 Science-Companion 文件夹，按其中 README.md 自行安装到 Edge。
+3. 从 https://claude.com/product/claude-science 安装 Windows 版 Claude Science。本包不含 Science 安装程序或其他人的 Science 数据。
+4. 从开始菜单或桌面打开 CSSwitch，填写自己的服务地址、API key 和模型，保存后使用一键启动。
+5. 中文和外部打开功能为可选项：打开安装目录的 Science-Companion 文件夹，按 README.md 自行安装到 Edge。仓库也提供独立插件目录。
+
+本次修复：
+- Windows 设置窗口按需创建；关闭时销毁界面及其 WebView2，再次打开时重建；后台服务仍可继续运行。
+- 修复窗口创建失败后的重试，以及关闭期间再次打开的处理。关闭前请保存表单，未保存的界面输入不会保留。
+- 本机修复后音频回归测试通过，用户已确认 B 站和 YouTube 恢复播放。Windows/Chromium 底层兼容性根因尚未完全确定，不作所有机器永久解决的保证。
+- 未关闭 Edge 音频沙盒或 CSSwitch 端口身份保护。
 
 程序与数据：
-- 启动器使用当前 Windows 用户目录，不依赖制作者的 G 盘、用户名或 SSH 配置。
-- CSSwitch 数据按程序规则存放在当前用户目录下 .csswitch，卸载不删除账号配置或研究数据。
-- 本包没有预置模型账号、API key、SSH 私钥、技能历史或科研文件；别人需要配置自己的服务。
-- 中文插件同时附在压缩包中和 CSSwitch 安装目录内，不会被自动加载到浏览器。
-- 更新前正常退出 CSSwitch。不要把 desktop.exe 单独发给别人。
+- 通用启动器使用当前 Windows 用户目录；本次保留原启动器，其 --diagnose 仍显示启动器自身的 20261013 版本。整包版本请查看 package-manifest.json。
+- CSSwitch 配置按程序规则保存在当前用户目录 .csswitch；卸载不删除该目录或研究数据。
+- 本包没有预置模型账号、API key、SSH 私钥、技能历史或科研文件。插件不会自动加载到浏览器。
+- 请分发完整安装包，不要单独分发 desktop.exe。
 
-说明：这是当前已安装修复版的定制分发包，不是上游官方新版。安装程序未做商业代码签名，Windows 可能显示未知发布者。
-有问题时先确认 Science 已安装、依赖组件已安装及模型服务配置正确；不要通过分享整个用户数据目录来“修复”。
+这是定制分发包，不是上游官方新版。安装器未做商业代码签名，Windows 可能显示未知发布者。
+详细变更和验证范围见仓库同目录的 修复说明.md 与 验证结果.json。
