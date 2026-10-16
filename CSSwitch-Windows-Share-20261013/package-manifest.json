@@ -1,0 +1,156 @@
+{
+  "package": "0.8.4-winshare.20261013",
+  "basis": "Installed repaired Windows binaries; no clean source-release claim.",
+  "files": [
+    {
+      "path": "CSSwitch-Launcher.exe",
+      "bytes": 11264,
+      "sha256": "2ccbb406049193cd1ed68ba7b74961c77aea9ed4127571aca57372af982df2f8"
+    },
+    {
+      "path": "LICENSE-CSSwitch.txt",
+      "bytes": 1088,
+      "sha256": "6b6e26063cb3dc079c7412168422d8d386cb04664e4c32879053c79d4a782480"
+    },
+    {
+      "path": "Science-Companion/Install-or-Update.cmd",
+      "bytes": 210,
+      "sha256": "fd49d200480700d5e8ffd587db12475235e1d05991735b0d7f9e4a61c33d93f2"
+    },
+    {
+      "path": "Science-Companion/Install.ps1",
+      "bytes": 3633,
+      "sha256": "ee85d7447a1ae7516b7cd0f4c6d10dc7ae9f0ea49301489bb561fdd9e3689cfa"
+    },
+    {
+      "path": "Science-Companion/README.md",
+      "bytes": 1922,
+      "sha256": "a0b799efa205801737dcd66a680127ffb2885f88fd682897735f9a4c276d322d"
+    },
+    {
+      "path": "Science-Companion/Unregister.ps1",
+      "bytes": 548,
+      "sha256": "1dc9390df9e2d452a47c82372ce3ffba2a4443d0675ea8fea30ca3e7f1c6a6d3"
+    },
+    {
+      "path": "Science-Companion/extension-id.txt",
+      "bytes": 33,
+      "sha256": "32674cbf8a7ecacead955661d1a3db141927922c89562bc979432191325bc977"
+    },
+    {
+      "path": "Science-Companion/extension/background.js",
+      "bytes": 1528,
+      "sha256": "eadcc88e99500864ae033c6ae94c6d2a499c20a4bb3d2ed87866a2b5e32ba0d3"
+    },
+    {
+      "path": "Science-Companion/extension/catalog.js",
+      "bytes": 115642,
+      "sha256": "e3d780538cdb8516d417630991a1d8ca5347fc3df05c5074e79ae642bfcace87"
+    },
+    {
+      "path": "Science-Companion/extension/common.js",
+      "bytes": 1729,
+      "sha256": "175751a9d0d994d30c4f348b3a0826b9a071c511652ebfe399aca0efa651e2a2"
+    },
+    {
+      "path": "Science-Companion/extension/content.js",
+      "bytes": 12298,
+      "sha256": "3f474922d5aa5099147c26d2fcc05b9d8b833fbceb43ce08c3b905d87ce1908a"
+    },
+    {
+      "path": "Science-Companion/extension/manifest.json",
+      "bytes": 1122,
+      "sha256": "8c088097f553c56a5989be1ae247fb9892dbb6fe20bdf48077b14c9101334f4a"
+    },
+    {
+      "path": "Science-Companion/extension/popup.css",
+      "bytes": 978,
+      "sha256": "cc03c79188a2bd7f74b101a1d23a16941653a17b08f3a5883ef080bfb5ac1553"
+    },
+    {
+      "path": "Science-Companion/extension/popup.html",
+      "bytes": 983,
+      "sha256": "84c81d2ec69358f65cac9f105e9e8d9eb3b0c3f7dd22f09ca6b13f7cb83989af"
+    },
+    {
+      "path": "Science-Companion/extension/popup.js",
+      "bytes": 858,
+      "sha256": "c356ffefb5dca4a444f47ffe4a4cc56023ea648969cf1c94b91d0c43ff8ddd55"
+    },
+    {
+      "path": "Science-Companion/extension/translations.js",
+      "bytes": 9312,
+      "sha256": "7b7f664911218f182a21132c78a1a9354f2ed09b6665fdfa0401ec908a757fc7"
+    },
+    {
+      "path": "Science-Companion/native/ScienceCompanionHost.exe",
+      "bytes": 15872,
+      "sha256": "ddac3fb421e711d817eb82e0a2088d5a17a7855b3841c7624b8b79bf34651a1e"
+    },
+    {
+      "path": "Science-Companion/native/com.csswitch.science_companion.json",
+      "bytes": 280,
+      "sha256": "6078c4c06b8b2a25b3f38d09d751c9a4dd91562c975e039a6d3a754a92b264b0"
+    },
+    {
+      "path": "THIRD-PARTY.txt",
+      "bytes": 253,
+      "sha256": "49a5a8600a09942253cf0c387dd783df1fac88b50bbd622af1fa2d6c7c0336bc"
+    },
+    {
+      "path": "csswitch-gateway.exe",
+      "bytes": 7214592,
+      "sha256": "a684f4efd385f8d5f9f5e24fd0b229b3c58ba20e76fe683b2429a84afa433b83"
+    },
+    {
+      "path": "desktop.exe",
+      "bytes": 21809152,
+      "sha256": "2fd28ac303d35b4c0b70d926107de90b1b720bb441cccac18f8f1dced2be930e"
+    },
+    {
+      "path": "prerequisites/MicrosoftEdgeWebview2Setup.exe",
+      "bytes": 1856216,
+      "sha256": "9b5ca0a259e6fc9b57230089258bb2ee1de74a9ed52f88d06b4ac354a8a68c70"
+    },
+    {
+      "path": "prerequisites/VC_redist.x64.exe",
+      "bytes": 25635768,
+      "sha256": "cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b"
+    },
+    {
+      "path": "scripts/doctor.sh",
+      "bytes": 5072,
+      "sha256": "021e5f8d2ee9eb5a0ac741c0effeba0131e7a012c6b8015289793f265887b7c1"
+    },
+    {
+      "path": "scripts/launch-virtual-sandbox.sh",
+      "bytes": 23839,
+      "sha256": "ba7259bbeba32ea6268baa1acdfe9f7d71f68d5795e597d07c41aaca3dffba36"
+    },
+    {
+      "path": "scripts/ssh-bridge/ssh",
+      "bytes": 242,
+      "sha256": "1ae8e6f03a59b5b8b1f6425e11bfdc39dab242f58518a344e3b9d2c4e1e12fd8"
+    },
+    {
+      "path": "scripts/stop-science-sandbox.sh",
+      "bytes": 3756,
+      "sha256": "4ae466c618c2890c128eb0bc1867f57f58df79a1895d5bbfbf757e5d75edc71d"
+    },
+    {
+      "path": "scripts/verify-proxy.sh",
+      "bytes": 1916,
+      "sha256": "aec97e5256a95dd7b2d4b99036236708743766fd1a6a91245ad4c700b79cb5e0"
+    },
+    {
+      "path": "使用说明.txt",
+      "bytes": 1809,
+      "sha256": "7732fde5e804606818fa5dfb430767dee518993b1e0516d0e2cd61937d845add"
+    },
+    {
+      "path": "安装包标识.txt",
+      "bytes": 29,
+      "sha256": "7bfc8a59102c767b432026965d5b0c04f9cc17d7514a73203761237fd01ccdd2"
+    }
+  ]
+}

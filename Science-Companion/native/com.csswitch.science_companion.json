@@ -1,0 +1,9 @@
+{
+  "name": "com.csswitch.science_companion",
+  "description": "Open exported Claude Science Markdown copies in Windows applications",
+  "path": "ScienceCompanionHost.exe",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://hphjkpihcfnihgoapmnlmnindjkaibdj/"
+  ]
+}

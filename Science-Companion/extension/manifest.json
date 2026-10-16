@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "Science 中文与外部打开",
+  "version": "1.1.0",
+  "description": "为本机 Claude Science 提供常用界面中文及 Markdown 外部应用打开。",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvbzdq7wP0bwD69o+vW9s4WAvwvgRhdjjzy065iX2QscyOmO8xNzmjE2U68sAsQtmpuzjLu5mKNKTlSIG+DPbxzNsEvBMwZu/Ir+5F9WuH+JviXamtLSWHykOtdzlvXkK0JnR0jWAd+EzZthYzWzlvl7pKe/JORqQXMHbxVNQveEKvX6klI4UWkHNy0SdVaY3YFB//EY89XTEMcEPxmzwRHODCvqYpp3ol8jht5nUtuQANN1P7ytPHKa/Tgb2xKnVQtqiPu2aFmckU4IpS0L6w9AmZscRmmV0TPiDpUpMu2yhxEfF6EiCNGaTJ+hjMk0nmHDLBlBWJPZfVqB/JJvbewIDAQAB",
+  "permissions": [
+    "storage",
+    "nativeMessaging"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Science 界面助手",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://localhost/*",
+        "http://127.0.0.1/*"
+      ],
+      "js": [
+        "common.js",
+        "translations.js",
+        "catalog.js",
+        "content.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ]
+}

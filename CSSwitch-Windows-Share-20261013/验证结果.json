@@ -1,0 +1,80 @@
+{
+  "date": "2026-10-13",
+  "package": "CSSwitch 0.8.4 Windows custom distribution",
+  "installed_program_unchanged": true,
+  "payload_allowlist_count": 30,
+  "private_profile_files_included": false,
+  "creator_specific_paths_in_text_payload": false,
+  "checks": [
+    {
+      "name": "silent_install_custom_unicode_directory",
+      "pass": true,
+      "exit": 0
+    },
+    {
+      "name": "all_installed_payload_hashes",
+      "pass": true,
+      "files": 30,
+      "mismatches": []
+    },
+    {
+      "name": "launcher_uses_current_user_not_creator_drive",
+      "pass": true,
+      "diagnostic": {
+        "version": "0.8.4-winshare.20261013",
+        "gatewayPresent": true,
+        "vcRuntime": true,
+        "webView2": true,
+        "x64": true
+      }
+    },
+    {
+      "name": "original_binary_identity_preserved",
+      "pass": true
+    },
+    {
+      "name": "unrelated_directory_rejected",
+      "pass": true,
+      "exit": 4
+    },
+    {
+      "name": "launcher_child_environment_and_no_forced_autostart",
+      "pass": true
+    },
+    {
+      "name": "upgrade_preserves_unmanaged_files",
+      "pass": true
+    },
+    {
+      "name": "native_helper_selftest",
+      "pass": true
+    },
+    {
+      "name": "native_helper_framing",
+      "pass": true
+    },
+    {
+      "name": "plugin_installer_portable_paths",
+      "pass": true,
+      "exit": 0
+    },
+    {
+      "name": "unchanged_extension_core_and_background_tests",
+      "pass": true
+    },
+    {
+      "name": "uninstall_preserves_user_files",
+      "pass": true
+    },
+    {
+      "name": "optional_plugin_not_auto_registered",
+      "pass": true
+    }
+  ],
+  "limitations": [
+    "No full clean-second-PC Science/provider/SSH end-to-end run.",
+    "Installer is not Authenticode signed.",
+    "Microsoft dependency installers verified signed; fresh-machine dependency installation not exercised on this configured PC.",
+    "Core binaries are current repaired installed artifacts, not a new upstream source release."
+  ]
+}

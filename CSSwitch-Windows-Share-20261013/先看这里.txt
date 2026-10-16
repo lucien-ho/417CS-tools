@@ -1,0 +1,20 @@
+﻿CSSwitch Windows 分享安装包 — 2026-10-13
+
+适用：Windows 11 x64。包含当前已修复的 CSSwitch 0.8.4 程序，以及可选的 Science 中文插件 1.1.0。
+
+首次使用：
+1. 运行 CSSwitch-0.8.4-Windows-x64-20261013-Setup.exe，按提示安装。安装目录可选，默认在当前用户 LocalAppData\Programs\CSSwitch。
+2. 安装程序按需运行微软 VC++ 和 WebView2 安装组件。VC++ 可能需要管理员确认；WebView2 缺失时需要联网下载运行时。
+3. 从 Claude Science 官方页面 https://claude.com/product/claude-science 安装 Windows 版本。本包不包含 Science 安装程序或他人的 Science 数据。
+4. 从开始菜单或桌面打开 CSSwitch，填写你自己的服务地址、API key 和模型，保存后使用一键启动。
+5. 想用中文和外部打开功能，再打开 Science-Companion 文件夹，按其中 README.md 自行安装到 Edge。
+
+程序与数据：
+- 启动器使用当前 Windows 用户目录，不依赖制作者的 G 盘、用户名或 SSH 配置。
+- CSSwitch 数据按程序规则存放在当前用户目录下 .csswitch，卸载不删除账号配置或研究数据。
+- 本包没有预置模型账号、API key、SSH 私钥、技能历史或科研文件；别人需要配置自己的服务。
+- 中文插件同时附在压缩包中和 CSSwitch 安装目录内，不会被自动加载到浏览器。
+- 更新前正常退出 CSSwitch。不要把 desktop.exe 单独发给别人。
+
+说明：这是当前已安装修复版的定制分发包，不是上游官方新版。安装程序未做商业代码签名，Windows 可能显示未知发布者。
+有问题时先确认 Science 已安装、依赖组件已安装及模型服务配置正确；不要通过分享整个用户数据目录来“修复”。
