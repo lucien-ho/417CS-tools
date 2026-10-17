@@ -1,6 +1,6 @@
 {
   "name": "com.csswitch.science_companion",
-  "description": "Open exported Claude Science Markdown copies in Windows applications",
+  "description": "Open Claude Science original local files in Windows applications",
   "path": "ScienceCompanionHost.exe",
   "type": "stdio",
   "allowed_origins": [

@@ -1,4 +1,4 @@
-﻿$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Stop'
 $registryPath = 'HKCU:\Software\Microsoft\Edge\NativeMessagingHosts\com.csswitch.science_companion'
 $expected = Join-Path $PSScriptRoot 'native\com.csswitch.science_companion.json'
 if (Test-Path $registryPath) {

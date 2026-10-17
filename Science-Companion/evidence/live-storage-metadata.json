@@ -1,0 +1,41 @@
+{
+  "version": "1.2.1",
+  "liveScienceMetadata": true,
+  "fileContentsRead": false,
+  "filesModified": false,
+  "externalAppsLaunched": false,
+  "samples": [
+    {
+      "extension": ".md",
+      "refHostPathAbsent": true,
+      "metadataFilePathExists": true,
+      "versionCount": 1,
+      "checkedVersionFiles": 2,
+      "allCheckedPathsExist": true
+    },
+    {
+      "extension": ".md",
+      "refHostPathAbsent": true,
+      "metadataFilePathExists": true,
+      "versionCount": 2,
+      "checkedVersionFiles": 3,
+      "allCheckedPathsExist": true
+    },
+    {
+      "extension": ".docx",
+      "refHostPathAbsent": true,
+      "metadataFilePathExists": true,
+      "versionCount": 2,
+      "checkedVersionFiles": 3,
+      "allCheckedPathsExist": true
+    },
+    {
+      "extension": ".pdf",
+      "refHostPathAbsent": true,
+      "metadataFilePathExists": true,
+      "versionCount": 1,
+      "checkedVersionFiles": 2,
+      "allCheckedPathsExist": true
+    }
+  ]
+}

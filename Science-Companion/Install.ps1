@@ -24,13 +24,13 @@ if (Test-Path -LiteralPath $registryPath) {
     $oldPath = (Get-Item -LiteralPath $registryPath).GetValue('')
     if ($oldPath -and $oldPath -ne $hostManifest -and !$ValidateOnly) { throw 'A different native host is registered; use its existing folder or unregister it first' }
 }
-$files = @('extension\manifest.json','extension\common.js','extension\translations.js','extension\catalog.js','extension\content.js','extension\background.js','extension\popup.html','extension\popup.css','extension\popup.js','native\ScienceCompanionHost.exe','native\com.csswitch.science_companion.json','extension-id.txt','README.md','Unregister.ps1','Install.ps1','Install-or-Update.cmd')
+$files = @('extension\manifest.json','extension\common.js','extension\resolve-file.js','extension\translations.js','extension\catalog.js','extension\content.js','extension\background.js','extension\popup.html','extension\popup.css','extension\popup.js','native\ScienceCompanionHost.exe','native\com.csswitch.science_companion.json','extension-id.txt','README.md','Unregister.ps1','Install.ps1','Install-or-Update.cmd')
 foreach ($relative in $files) { if (!(Test-Path -LiteralPath (Join-Path $sourceRoot $relative) -PathType Leaf)) { throw "Missing package file: $relative" } }
 if ($ValidateOnly) {
     @{validated=$true;installRoot=$InstallRoot;extensionId=$extensionId;registryUnchanged=$true} | ConvertTo-Json
     exit 0
 }
-foreach ($folder in @('extension','native','Exports')) { New-Item -ItemType Directory -Force -Path (Join-Path $InstallRoot $folder) | Out-Null }
+foreach ($folder in @('extension','native')) { New-Item -ItemType Directory -Force -Path (Join-Path $InstallRoot $folder) | Out-Null }
 foreach ($relative in $files) {
     $from = Join-Path $sourceRoot $relative; $to = Join-Path $InstallRoot $relative
     if ([IO.Path]::GetFullPath($from) -ne [IO.Path]::GetFullPath($to)) { Copy-Item -LiteralPath $from -Destination $to -Force }
@@ -42,4 +42,4 @@ Write-Host ''
 Write-Host '安装完成。请在 Edge 的 edge://extensions 中开启开发人员模式，加载以下文件夹：'
 Write-Host (Join-Path $InstallRoot 'extension')
 Write-Host '浏览器扩展需要手动加载。已有扩展请点击重新加载，然后刷新 Science 网页。'
-Write-Host ('Markdown 导出副本保存在：' + (Join-Path $InstallRoot 'Exports'))
+Write-Host '新版直接打开本机原文件；仅在明确同意后为远程文件或附件保存缓存副本。'

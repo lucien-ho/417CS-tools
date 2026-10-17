@@ -1,0 +1,21 @@
+{
+  "localFormats": [
+    "pdf",
+    "docx",
+    "xlsx",
+    "png",
+    "md",
+    "fasta"
+  ],
+  "originalOperations": 18,
+  "originalDownloads": 0,
+  "remoteRevealDownloads": 0,
+  "missingVersionRejected": true,
+  "currentInternalStorageResolved": true,
+  "historicalInternalStorageResolved": true,
+  "binaryCopyExplicitConsent": true,
+  "syntheticClicksRejected": true,
+  "accountErrorTranslated": true,
+  "documentBodyPreserved": true,
+  "liveScienceTested": false
+}

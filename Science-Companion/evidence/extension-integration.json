@@ -1,0 +1,18 @@
+{
+  "isolatedBrowser": true,
+  "realScienceContent": false,
+  "unpackedExtensionLoaded": true,
+  "nativeMessagingHandshake": false,
+  "packagedVersionVerified": true,
+  "contentScriptTranslation": true,
+  "expandedCatalogAndParagraphs": true,
+  "menuInjected": true,
+  "externalApplicationLaunchTested": false,
+  "mainWorldScripting": true,
+  "nativeCallsMocked": true,
+  "apiAuthStaysInPage": true,
+  "displayedVersionOverridesStaleTab": true,
+  "internalFilePathWithoutRefHostPath": true,
+  "largeDocumentRendererSkipped": true,
+  "libraryPortalSelection": true
+}

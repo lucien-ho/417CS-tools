@@ -1,0 +1,277 @@
+{
+  "version": "1.2.2",
+  "reference": "Claude Science 0.1.60 bundled public UI assets (read only)",
+  "dictionaryEntries": 2074,
+  "directSourceCandidates": 1597,
+  "directSourceTranslated": 1470,
+  "additionalSettingsSentences": 246,
+  "unreviewedCandidates": [],
+  "scopeNote": "Counts cover extracted static UI properties and reviewed settings sentences, not every dynamically generated runtime string. Preserved entries are technical literals and sample scientific content.",
+  "perModule": {
+    "ArtifactTile-CX_6xHAI.js": {
+      "candidates": 46,
+      "translated": 46,
+      "preserved": 0
+    },
+    "AudioPreview-C2vxDcOz.js": {
+      "candidates": 1,
+      "translated": 1,
+      "preserved": 0
+    },
+    "CapabilitiesPage-Nhb57jVs.js": {
+      "candidates": 424,
+      "translated": 382,
+      "preserved": 42
+    },
+    "CloudStorageModal-BzeVH4_l.js": {
+      "candidates": 15,
+      "translated": 15,
+      "preserved": 0
+    },
+    "CodePane-BZTJ5w4C.js": {
+      "candidates": 1,
+      "translated": 1,
+      "preserved": 0
+    },
+    "codeTint-BXffYqfQ.js": {
+      "candidates": 5,
+      "translated": 5,
+      "preserved": 0
+    },
+    "common-DNqxE6Q5.js": {
+      "candidates": 1,
+      "translated": 1,
+      "preserved": 0
+    },
+    "ComputePane-B1uU_AFR.js": {
+      "candidates": 24,
+      "translated": 21,
+      "preserved": 3
+    },
+    "ControlPanelModal-Cn7M9NTx.js": {
+      "candidates": 144,
+      "translated": 142,
+      "preserved": 2
+    },
+    "CsvPreview-BJhr4e2k.js": {
+      "candidates": 1,
+      "translated": 1,
+      "preserved": 0
+    },
+    "docxPartsWorker-DbvgAYEj.js": {
+      "candidates": 1,
+      "translated": 1,
+      "preserved": 0
+    },
+    "DocxPreview-DoXrjxWL.js": {
+      "candidates": 2,
+      "translated": 2,
+      "preserved": 0
+    },
+    "EditableLatexPreview-BQmO7dnr.js": {
+      "candidates": 1,
+      "translated": 1,
+      "preserved": 0
+    },
+    "EditableMarkdownPreview-DXJyNKyx.js": {
+      "candidates": 1,
+      "translated": 1,
+      "preserved": 0
+    },
+    "EditableTextPreview-CNsrOndh.js": {
+      "candidates": 1,
+      "translated": 1,
+      "preserved": 0
+    },
+    "EnvironmentSnapshotDrawer-CqJSjExA.js": {
+      "candidates": 11,
+      "translated": 10,
+      "preserved": 1
+    },
+    "ExportToCloudModal-Dli86qF1.js": {
+      "candidates": 4,
+      "translated": 4,
+      "preserved": 0
+    },
+    "FileBrowserPane-COqwEBBU.js": {
+      "candidates": 11,
+      "translated": 11,
+      "preserved": 0
+    },
+    "FilesOverlay-Dkfi4hmO.js": {
+      "candidates": 15,
+      "translated": 15,
+      "preserved": 0
+    },
+    "GenomePreview-BZqkRDJL.js": {
+      "candidates": 13,
+      "translated": 12,
+      "preserved": 1
+    },
+    "HtmlAnnotationOverlay-BO-CmeNq.js": {
+      "candidates": 1,
+      "translated": 0,
+      "preserved": 1
+    },
+    "HtmlPreview-CeivSO32.js": {
+      "candidates": 23,
+      "translated": 23,
+      "preserved": 0
+    },
+    "ImagePreview-DWaONGZS.js": {
+      "candidates": 1,
+      "translated": 1,
+      "preserved": 0
+    },
+    "index-aHEQ1DfQ.js": {
+      "candidates": 2,
+      "translated": 2,
+      "preserved": 0
+    },
+    "index-CGNT03Xl.js": {
+      "candidates": 100,
+      "translated": 68,
+      "preserved": 32
+    },
+    "index-DTccDIrC.js": {
+      "candidates": 619,
+      "translated": 581,
+      "preserved": 38
+    },
+    "KernelNotebookPane-BWS-wWPe.js": {
+      "candidates": 15,
+      "translated": 13,
+      "preserved": 2
+    },
+    "latexRenderBudget-FIcD2bf1.js": {
+      "candidates": 1,
+      "translated": 1,
+      "preserved": 0
+    },
+    "LineageMessagesDrawer-CpERHfKK.js": {
+      "candidates": 2,
+      "translated": 2,
+      "preserved": 0
+    },
+    "McpAppTile-newah3qw.js": {
+      "candidates": 2,
+      "translated": 2,
+      "preserved": 0
+    },
+    "MemoryScreen-D6ya2DRh.js": {
+      "candidates": 32,
+      "translated": 32,
+      "preserved": 0
+    },
+    "MoleculePreview-NLyeQ2YB.js": {
+      "candidates": 7,
+      "translated": 7,
+      "preserved": 0
+    },
+    "MSAPreview-jIjKYpeS.js": {
+      "candidates": 20,
+      "translated": 16,
+      "preserved": 4
+    },
+    "NotebookPreview-nZwBS67_.js": {
+      "candidates": 2,
+      "translated": 2,
+      "preserved": 0
+    },
+    "NoteModal-BBJOPSLi.js": {
+      "candidates": 6,
+      "translated": 6,
+      "preserved": 0
+    },
+    "NotePreviewModal-B0VGpojp.js": {
+      "candidates": 4,
+      "translated": 4,
+      "preserved": 0
+    },
+    "OnboardingElicitCard-c9LJjkYS.js": {
+      "candidates": 5,
+      "translated": 5,
+      "preserved": 0
+    },
+    "OnboardingFlow-DgiCDdF-.js": {
+      "candidates": 65,
+      "translated": 45,
+      "preserved": 20
+    },
+    "ParquetPreview-DtvhTG96.js": {
+      "candidates": 3,
+      "translated": 2,
+      "preserved": 1
+    },
+    "PdfPreview-DFxwvBPW.js": {
+      "candidates": 4,
+      "translated": 4,
+      "preserved": 0
+    },
+    "PermissionsWidgetCard-Ci1ZMARH.js": {
+      "candidates": 4,
+      "translated": 4,
+      "preserved": 0
+    },
+    "PlanPreview-DUZmVLK7.js": {
+      "candidates": 5,
+      "translated": 5,
+      "preserved": 0
+    },
+    "primitives-5SURA5Mz.js": {
+      "candidates": 29,
+      "translated": 29,
+      "preserved": 0
+    },
+    "ProjectControlPlane-DW4IOjV5.js": {
+      "candidates": 37,
+      "translated": 37,
+      "preserved": 0
+    },
+    "ProjectDashboard-CnkrQc8i.js": {
+      "candidates": 20,
+      "translated": 20,
+      "preserved": 0
+    },
+    "ProjectSettings-D82Ryssf.js": {
+      "candidates": 44,
+      "translated": 44,
+      "preserved": 0
+    },
+    "ProvenancePane-B2vm25Zx.js": {
+      "candidates": 19,
+      "translated": 19,
+      "preserved": 0
+    },
+    "RemoteTextPreview-BKNNYwNS.js": {
+      "candidates": 1,
+      "translated": 1,
+      "preserved": 0
+    },
+    "RightPaneTabContent-VOcOB0cK.js": {
+      "candidates": 50,
+      "translated": 49,
+      "preserved": 1
+    },
+    "SessionNotebookModal-DSy0FObU.js": {
+      "candidates": 7,
+      "translated": 7,
+      "preserved": 0
+    },
+    "StructurePreview-BOV7Uplh.js": {
+      "candidates": 3,
+      "translated": 3,
+      "preserved": 0
+    },
+    "TextPreview-DvwEYy3H.js": {
+      "candidates": 1,
+      "translated": 1,
+      "preserved": 0
+    },
+    "VideoPreview-LcYuliZH.js": {
+      "candidates": 1,
+      "translated": 1,
+      "preserved": 0
+    }
+  }
+}

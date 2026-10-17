@@ -1,0 +1,15 @@
+﻿Science Companion 1.2.2
+
+1. 完整解压，运行 Install-or-Update.cmd。
+2. 打开 edge://extensions，重新加载“Science 中文与外部打开”。
+3. 刷新 Science 网页，确认扩展和本地组件版本均为 1.2.2。
+
+首次加载扩展时选择安装脚本显示的 extension 子目录，其中必须直接包含 manifest.json。
+
+本次修复：对话文件右键菜单识别、PDF 等成果预览的外部打开入口，
+以及 Windows 沙箱设置横幅、按钮和状态说明的中文。
+仍使用 file_path 直接定位实际存储文件，并按选中的版本精确匹配。
+不需要下载副本，不修改 Science 程序。
+
+注意：直接改写内部存储文件可能影响版本校验。定位和查看不修改内容。
+详细说明与验证范围见 README.md。

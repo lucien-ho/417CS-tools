@@ -1,0 +1,33 @@
+{
+  "version": "1.2.2",
+  "referenceSha256": "272aa81d5f50d76c787ac9cc7679f1bc7f29f91ea127125316e522585b8c0c4c",
+  "actualSourceComponents": [
+    "G5",
+    "Sq",
+    "HKt",
+    "WKt",
+    "L4"
+  ],
+  "inlineMenuExpressionFromSource": true,
+  "previewHarnessUsesSourceContract": true,
+  "realReactHooksAndPortals": true,
+  "browserExtensionLoaded": true,
+  "cases": [
+    "actual-tray-old",
+    "actual-tray-new",
+    "inline-old",
+    "inline-new",
+    "inline-latest",
+    "actual-image-wrapper",
+    "standalone-pdf",
+    "standalone-md",
+    "standalone-docx",
+    "standalone-xlsx",
+    "standalone-png",
+    "missing-version-rejected-all-actions"
+  ],
+  "nativeOpenRequests": 31,
+  "nativeOpenMocked": true,
+  "liveUserPageTested": false,
+  "downloadRequests": 0
+}
