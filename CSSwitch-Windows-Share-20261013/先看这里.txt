@@ -1,33 +1,27 @@
-CSSwitch Windows 分享安装包 — 2026-10-17 修复版
+﻿CSSwitch Windows 分享包 — 2026-10-20 依赖修复版
 
-适用：Windows 11 x64。CSSwitch 0.8.4 定制版，包版本 0.8.4-winshare.20261017，安装器版本 0.8.4.1017；包含可选 Science 中文插件 1.1.0。
-为保持原下载链接，目录和安装包文件名保留 20261013；其中内容已替换为 2026-10-17 修复版，请以 package-manifest.json 和 SHA256SUMS.txt 为准。
-
-插件更新（2026-10-18）：仓库中的独立 Science-Companion 已更新为 1.2.2，修复对话文件右键、PDF 预览外部打开和 Windows 沙箱提示中文。本安装器内附的仍为 1.1.0；安装或覆盖升级 CSSwitch 后，请从仓库首页下载独立 1.2.2 ZIP，运行其中 Install-or-Update.cmd，再重新加载 Edge 扩展。此说明不表示 CSSwitch 安装器已重新打包。
-
-已有用户升级：
-1. 保存设置和 Science 中未完成的工作，再在 CSSwitch 中选择“退出 CSSwitch”，等待后台退出。仅点设置窗口右上角 × 会保留后台，不能代替完整退出。
-2. 运行本安装器，选择原分享版的安装目录覆盖安装。安装器会拒绝正在使用或不属于此分享包的非空目录；此时先完整退出原程序，或另选空目录。
-3. 使用开始菜单或桌面的 CSSwitch 入口重新启动。如提示 18991 被未知或旧 listener 占用，请先正常退出旧实例；不要强行结束身份不明的进程或关闭端口身份保护。
-
-首次使用：
-1. 运行 CSSwitch-0.8.4-Windows-x64-20261013-Setup.exe。默认安装到当前用户 LocalAppData\Programs\CSSwitch，也可选择其他空目录。
-2. 安装程序按需运行微软 VC++ 和 WebView2 安装组件。VC++ 可能需要管理员确认；WebView2 缺失时需要联网下载运行时。
-3. 从 https://claude.com/product/claude-science 安装 Windows 版 Claude Science。本包不含 Science 安装程序或其他人的 Science 数据。
-4. 从开始菜单或桌面打开 CSSwitch，填写自己的服务地址、API key 和模型，保存后使用一键启动。
-5. 中文和外部打开功能为可选项：打开安装目录的 Science-Companion 文件夹，按 README.md 自行安装到 Edge。仓库也提供独立插件目录。
+版本：0.8.4-winshare.20261020；安装器 0.8.4.1020；附带 Science-Companion 1.2.2。
+为保留原下载链接，仓库目录和安装器文件名仍含 20261013；文件内容已替换为 2026-10-20 依赖修复版。
 
 本次修复：
-- Windows 设置窗口按需创建；关闭时销毁界面及其 WebView2，再次打开时重建；后台服务仍可继续运行。
-- 修复窗口创建失败后的重试，以及关闭期间再次打开的处理。关闭前请保存表单，未保存的界面输入不会保留。
-- 本机修复后音频回归测试通过，用户已确认 B 站和 YouTube 恢复播放。Windows/Chromium 底层兼容性根因尚未完全确定，不作所有机器永久解决的保证。
-- 未关闭 Edge 音频沙盒或 CSSwitch 端口身份保护。
+- 安装包内置官方 PortableGit 2.56.0.windows.2，补齐启动脚本需要的 Git Bash 和工具。
+- 启动器先检查依赖，再通过 CSSWITCH_GIT_BASH 将私有 Bash 路径传给桌面程序。
+- 不要求目标电脑预先安装 Git，不修改系统 PATH。runtime\git 与 Science 的 Conda/runtime 无关。
+- 保留 2026-10-17 的窗口关闭及 WebView2 释放修复；desktop.exe、gateway 和启动脚本字节不变。
+- 中文插件升级到 1.2.2，支持对话文件右键、PDF 预览外部打开及 Windows 沙箱提示中文。
 
-程序与数据：
-- 通用启动器使用当前 Windows 用户目录；本次保留原启动器，其 --diagnose 仍显示启动器自身的 20261013 版本。整包版本请查看 package-manifest.json。
-- CSSwitch 配置按程序规则保存在当前用户目录 .csswitch；卸载不删除该目录或研究数据。
-- 本包没有预置模型账号、API key、SSH 私钥、技能历史或科研文件。插件不会自动加载到浏览器。
-- 请分发完整安装包，不要单独分发 desktop.exe。
+安装与更新：
+1. 保存设置，在 CSSwitch 左下角选择“退出 CSSwitch”。仅关闭窗口会保留后台。
+2. 运行 CSSwitch-0.8.4-Windows-x64-20261013-Setup.exe，选择原分享版目录覆盖安装，或选择空目录。
+3. 从桌面或开始菜单的 CSSwitch 快捷方式启动。请使用 CSSwitch-Launcher.exe 入口，避免直接运行 desktop.exe。
+4. 首次使用需另行安装官方 Claude Science，填写自己的服务地址、API key 和模型。
+5. 需要中文和外部打开时，运行安装目录 Science-Companion\Install-or-Update.cmd；到 edge://extensions 重新加载扩展，再刷新 Science。首次加载选择 extension 子目录。
 
-这是定制分发包，不是上游官方新版。安装器未做商业代码签名，Windows 可能显示未知发布者。
-详细变更和验证范围见仓库同目录的 修复说明.md 与 验证结果.json。
+说明：
+- 安装目录中的 runtime\git 请随程序保留。若检查提示缺失，请重新安装完整包。
+- CSSwitch-Launcher.exe --diagnose 输出 gitBashReady 等依赖状态，不会启动 Science；--check-git 通过时返回 0。
+- 完整退出前请勿覆盖安装。安装器不接管身份不明的进程，不绕过 8765/预览端口保护。
+- 旧电脑上的单独修复启动器不再是必需项；新启动器直接完成依赖检查，无需多层转发。
+- 本包不包含 Claude Science 程序、用户 Conda/runtime、API key、SSH 私钥或研究数据，不修改 Claude Science 代码。
+- 该补丁不解决其他独立问题，也不代表新电脑的模型服务或完整 Science 会话已经验证成功。
+- 这是定制分发包，安装器未做商业代码签名。卸载保留用户配置以及不属于本包的文件。

@@ -1,3 +1,4 @@
 # These are release files; preserve exact bytes for package-manifest hashes.
 Science-Companion/** -text whitespace=trailing-space,space-before-tab,cr-at-eol
 downloads/** -text whitespace=trailing-space,space-before-tab,cr-at-eol
+CSSwitch-Windows-Share-20261013/CSSwitch-Launcher.cs -text whitespace=trailing-space,space-before-tab,cr-at-eol

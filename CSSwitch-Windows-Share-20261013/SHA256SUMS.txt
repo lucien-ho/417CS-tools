@@ -1,1 +1,1 @@
-81a302d50d5c6d19197f311fe3f494717d9d0e443585ad7cfcff9f5a3a08ca2a  CSSwitch-0.8.4-Windows-x64-20261013-Setup.exe
+2287f87b8a72bca9b01669adf5086a7ed5fecd9b239c8e169be19cea9fca0f1c  CSSwitch-0.8.4-Windows-x64-20261013-Setup.exe
