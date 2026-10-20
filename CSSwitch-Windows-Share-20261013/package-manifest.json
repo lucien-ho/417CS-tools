@@ -1,8 +1,8 @@
 {
-  "package": "0.8.4-winshare.20261020",
-  "installer_version": "0.8.4.1020",
+  "package": "0.8.4-winshare.20261020.2",
+  "installer_version": "0.8.4.1021",
   "release_date": "2026-10-20",
-  "basis": "0.8.4-winshare.20261017",
+  "basis": "0.8.4-winshare.20261020 + startup recovery",
   "companionVersion": "1.2.2",
   "gitVersion": "v2.56.0.windows.2",
   "files": [
@@ -158,8 +158,8 @@
     },
     {
       "path": "desktop.exe",
-      "bytes": 21899776,
-      "sha256": "efce9cab66fd4b834dc9b439ce2eccfd4539fc710e60bc623d0e77e0fc830a29"
+      "bytes": 21761536,
+      "sha256": "f39284bf1c635fd26f010cd07ed64769e75f859c6fe753b64861a4a4ececb967"
     },
     {
       "path": "git-runtime-source.json",
@@ -48258,8 +48258,8 @@
     },
     {
       "path": "使用说明.txt",
-      "bytes": 2300,
-      "sha256": "51cb00ed9ff6512a91880d0b78b87db219c045ada83f7ac29edd4e1482ae9c33"
+      "bytes": 1317,
+      "sha256": "a14409739592514983b666d6f7d57711391852c227f96bc408e570b122391247"
     },
     {
       "path": "安装包标识.txt",
@@ -48268,6 +48268,6 @@
     }
   ],
   "compatibility_filename": "CSSwitch-0.8.4-Windows-x64-20261013-Setup.exe",
-  "original_build_filename": "CSSwitch-0.8.4-Windows-x64-20261020-Setup.exe",
-  "installer_sha256": "2287f87b8a72bca9b01669adf5086a7ed5fecd9b239c8e169be19cea9fca0f1c"
+  "original_build_filename": "CSSwitch-0.8.4-Windows-x64-20261020-R2-Setup.exe",
+  "installer_sha256": "ba6f4bc9aca12b0d7d962a82eae4c276f67e62b24a1ebf5d0c3921088a5ae944"
 }

@@ -1,12 +1,12 @@
 {
-  "package": "0.8.4-winshare.20261020",
+  "package": "0.8.4-winshare.20261020.2",
   "tests": [
     {
       "name": "baseline_installed_in_isolated_unicode_space_metachar_path",
       "passed": true
     },
     {
-      "name": "upgrade_from_20261017_preserves_user_file",
+      "name": "upgrade_from_20261020_preserves_user_file",
       "passed": true
     },
     {
@@ -16,9 +16,13 @@
       "mismatches": []
     },
     {
-      "name": "panel_repair_gateway_and_scripts_unchanged",
+      "name": "startup_recovery_desktop_installed",
+      "passed": true
+    },
+    {
+      "name": "gateway_and_scripts_unchanged",
       "passed": true,
-      "files": 7
+      "files": 6
     },
     {
       "name": "private_git_works_with_no_system_git_on_path",

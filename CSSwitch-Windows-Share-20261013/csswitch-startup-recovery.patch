@@ -1,0 +1,280 @@
+diff --git a/desktop/skill-package/src/science.rs b/desktop/skill-package/src/science.rs
+index cefe0d6..129bca8 100644
+--- a/desktop/skill-package/src/science.rs
++++ b/desktop/skill-package/src/science.rs
+@@ -754,6 +754,23 @@ struct ProcessOutput {
+ }
+ 
+ fn control_url_exit_error(output: &ProcessOutput) -> AttachError {
++    // On Windows the daemon can accept connections before its local control
++    // endpoint can mint a link. Do not classify every exit=1 as readiness:
++    // only this exact, observed diagnostic is eligible for bounded retries.
++    // The coordinator revalidates the managed owner before each attempt.
++    #[cfg(windows)]
++    if output.exit_code == Some(1)
++        && output.stdout.is_empty()
++        && std::str::from_utf8(&output.stderr).is_ok_and(|text| {
++            text.trim() == "claude-science: couldn't mint a sign-in link for the running daemon — restart it with 'claude-science stop && claude-science serve'."
++        })
++    {
++        return AttachError::new(
++            "SCIENCE_CONTROL_NOT_READY",
++            "Science 已启动，本机登录链接暂未就绪；正在限时重试",
++        )
++        .retryable(true);
++    }
+     // Science 0.1.60 on Windows can report this before daemon discovery is
+     // ready. Require the complete known diagnostic and exit code: broad
+     // substring matching would retry permission/auth/runtime failures too.
+diff --git a/desktop/skill-package/tests/science_control_windows.rs b/desktop/skill-package/tests/science_control_windows.rs
+index 7a24831..de6f3c8 100644
+--- a/desktop/skill-package/tests/science_control_windows.rs
++++ b/desktop/skill-package/tests/science_control_windows.rs
+@@ -48,7 +48,9 @@ fn only_exact_windows_not_ready_exit_is_retryable() {
+     let error = fixture.error(Duration::from_secs(3));
+     assert_eq!(error.code, "SCIENCE_CONTROL_NOT_READY");
+     assert!(error.is_health_bootstrap_retryable());
+-    for scenario in ["unknown-four", "wrong-code", "mixed-output"] {
++    fixture.scenario("mint-not-ready", 18988);
++    assert!(fixture.error(Duration::from_secs(3)).is_health_bootstrap_retryable());
++    for scenario in ["unknown-four", "wrong-code", "mixed-output", "mint-mixed", "mint-extra", "mint-wrong-code"] {
+         fixture.scenario(scenario, 18988);
+         let error = fixture.error(Duration::from_secs(3));
+         assert_eq!(error.code, "SCIENCE_CONTROL_FAILED", "{scenario}");
+@@ -121,6 +123,8 @@ fn not_ready_can_recover_to_authenticated_health_session() {
+     let port=listener.local_addr().unwrap().port();
+     let fixture=Fixture::new("not-ready",port);
+     assert!(fixture.error(Duration::from_secs(3)).is_health_bootstrap_retryable());
++    fixture.scenario("mint-not-ready",port);
++    assert!(fixture.error(Duration::from_secs(3)).is_health_bootstrap_retryable());
+     fixture.scenario("success",port);
+     let worker=auth_fixture(listener);
+     let result = open_science_health_session_before(&fixture.context,Instant::now()+Duration::from_secs(3));
+diff --git a/desktop/src-tauri/src/runtime/sandbox_session/one_click.rs b/desktop/src-tauri/src/runtime/sandbox_session/one_click.rs
+index a46cdb9..c6d2ecf 100644
+--- a/desktop/src-tauri/src/runtime/sandbox_session/one_click.rs
++++ b/desktop/src-tauri/src/runtime/sandbox_session/one_click.rs
+@@ -1483,7 +1483,7 @@ fn capture_one_click_entry_facts(
+         )
+     };
+     let remembered_runtime_was_present = remembered_runtime.is_some();
+-    let (science_state, running_runtime) = match remembered_runtime {
++    let (science_state, mut running_runtime) = match remembered_runtime {
+         Some(runtime) => {
+             let observed = ScienceHostAdapter::probe_known(cfg.sandbox_port, &runtime);
+             let running = (observed == SandboxScienceState::RunningHealthy).then_some(runtime);
+@@ -1543,20 +1543,38 @@ fn capture_one_click_entry_facts(
+             );
+         }
+         SandboxScienceState::Unknown => {
+-            if interrupted_environment_runtime_id.is_some() {
+-                return Err(TypedOneClickFailure::new(
+-                    OneClickFailureKind::ScienceStart,
+-                    "上次启动在 Science 环境暴露边界中断，且当前 listener/runtime 身份无法确认；已拒绝自动恢复；environment_uncertain；recovery_status=manual_recovery_required",
++            // A failed health/status query does not erase an exact persisted
++            // launch receipt. Route only a revalidated owner through the
++            // existing durable stop-before-snapshot transaction.
++            if let Some(owned) = ScienceHostAdapter::recover_owned_runtime(
++                cfg.sandbox_port,
++                &version_cache,
++            )
++            .map_err(|message| typed_one_click_err(OneClickFailureKind::ScienceStart, message))?
++            {
++                validate_interrupted_science_environment_runtime(
++                    interrupted_environment_runtime_id,
++                    &owned,
+                 )
+-                .with_recovery(ProjectedRecovery::environment_uncertain_manual()));
++                .map_err(|error| typed_interrupted_science_err(OneClickFailureKind::Prepare, error))?;
++                selected_runtime = Some(owned.clone());
++                running_runtime = Some(owned);
++            } else {
++                if interrupted_environment_runtime_id.is_some() {
++                    return Err(TypedOneClickFailure::new(
++                        OneClickFailureKind::ScienceStart,
++                        "上次启动在 Science 环境暴露边界中断，且当前 listener/runtime 身份无法确认；已拒绝自动恢复；environment_uncertain；recovery_status=manual_recovery_required",
++                    )
++                    .with_recovery(ProjectedRecovery::environment_uncertain_manual()));
++                }
++                let sandbox_port = cfg.sandbox_port;
++                return Err(typed_one_click_err(
++                    OneClickFailureKind::ScienceStart,
++                    format!(
++                        "端口 {sandbox_port} 或数据目录状态不一致，且无法证明进程属于 CSSwitch；未自动结束它。请确认占用程序后再重试。"
++                    ),
++                ));
+             }
+-            let sandbox_port = cfg.sandbox_port;
+-            return Err(typed_one_click_err(
+-                OneClickFailureKind::ScienceStart,
+-                format!(
+-                    "无法确认隔离 Science 状态（端口 {sandbox_port} 或 data-dir 状态不一致）。请先停止占用该端口的进程后重试。"
+-                ),
+-            ));
+         }
+     }
+     Ok(OneClickEntryFacts {
+diff --git a/desktop/src-tauri/src/runtime/science/host_adapter.rs b/desktop/src-tauri/src/runtime/science/host_adapter.rs
+index 53624ae..e43f140 100644
+--- a/desktop/src-tauri/src/runtime/science/host_adapter.rs
++++ b/desktop/src-tauri/src/runtime/science/host_adapter.rs
+@@ -694,6 +694,23 @@ impl ScienceHostAdapter {
+         sandbox_listener_matches_runtime(port, runtime)
+     }
+ 
++    /// Ownership, not health, authorizes recovery of an unresponsive old daemon.
++    /// This does not publish a healthy state or permit an authenticated request.
++    pub(crate) fn recover_owned_runtime(
++        port: u16,
++        version_cache: &ScienceVersionCache,
++    ) -> Result<Option<ScienceRuntimeIdentity>, String> {
++        for mut runtime in runtime_probe_candidates(port, version_cache)? {
++            if let Some(token) = Self::managed_receipt(port, &runtime) {
++                hydrate_runtime_adoption_from_managed_launch(&token, &mut runtime)?;
++                if Self::receipt_is_current(&token, &runtime) {
++                    return Ok(Some(runtime));
++                }
++            }
++        }
++        Ok(None)
++    }
++
+     pub(crate) fn url(port: u16, runtime: &ScienceRuntimeIdentity) -> String {
+         sandbox_url(port, runtime)
+     }
+diff --git a/docs/architecture/science-runtime.md b/docs/architecture/science-runtime.md
+index 8cffd9c..ebe1181 100644
+--- a/docs/architecture/science-runtime.md
++++ b/docs/architecture/science-runtime.md
+@@ -211,6 +211,10 @@ CSSwitch 是启动与路由插件，不拥有 Science 的语言环境。冷启
+ 
+ ## 运行中身份与恢复
+ 
++Windows 启动时，`claude-science url` 的精确 `exit=1` 本机登录链接生成失败诊断，与精确 `exit=4` daemon 尚未发现诊断，允许进入最多 120 秒的控制面引导重试。每次查询前后仍复核受管启动身份；未知 stderr、混合 stdout、错误退出码、运行身份变化或认证失败不因此获准重试。持续失败仍报告超时并执行既有补偿，不将开放端口当作启动成功。
++
++显式“一键开始”遇到健康或 status 检查失败的旧实例时，可单独从持久化 managed receipt 恢复进程归属。只有程序指纹、数据目录、端口、唯一 listener PID 和进程创建身份均一致才进入既有 cold transaction：记录停止意图，停止旧实例，验证端口关闭且精确进程退出，再快照和启动同一 runtime。该归属证明不发布健康状态，不授权控制地址认证，也不覆盖不同 runtime 的环境暴露记录。无记录、身份变化或未知占用者仍拒绝自动终止。健康且绑定一致的实例继续复用。
++
+ CSSwitch 在内存中记录实际 launch binary path、来源（`explicit`、`official_updated`、`installed_app` 或 `cached_once`）、版本和选择时文件指纹。启动、复用、恢复与停止操作使用这份 runtime metadata，并在需要控制 daemon 的边界做强身份检查。URL helper 也接收该 metadata，但自身允许上述 localhost fallback，不能单独作为强身份证明。
+ 
+ 停止不能只信任 Science CLI 的退出码：部分版本会返回成功并删除 lockfile，但 daemon 仍在监听。CSSwitch 在调用 CLI 前后都要求 sandbox port 的唯一监听 PID 与已记录 executable 精确匹配；CLI 后端口仍存活时，只向这一个前后均匹配的 PID 发送 TERM，超时后再次复核同一身份才 KILL。端口关闭后最多再等 5 秒，只有端口仍关闭且精确进程已退出才清理 managed receipt 并返回成功；超时保留 receipt 并返回 `ExitUnconfirmed`。监听身份变化时不发送信号并返回错误。Windows 在同一查询句柄上要求进程未触发终止信号后才接受创建时间；已退出但句柄仍被持有的进程（包括退出码 259）不作为 live identity。
+diff --git a/test/prepare_windows_startup_recovery.py b/test/prepare_windows_startup_recovery.py
+new file mode 100644
+index 0000000..16b3f56
+--- /dev/null
++++ b/test/prepare_windows_startup_recovery.py
+@@ -0,0 +1,12 @@
++from pathlib import Path
++import re
++root=Path(__file__).resolve().parents[1]
++text=(root/'desktop/src-tauri/src/lib.rs').read_text('utf-8')
++text=re.sub(r'^//!', '//', text, flags=re.M)
++def module(m):
++    name=m[1]
++    path=f'../src/{name}.rs' if (root/f'desktop/src-tauri/src/{name}.rs').exists() else f'../src/{name}/mod.rs'
++    return f'#[path = "{path}"]\nmod {name};'
++text=re.sub(r'^mod (\w+);$',module,text,flags=re.M)
++text+='\n'+(root/'test/windows_startup_recovery_main.rs').read_text('utf-8')
++(root/'desktop/src-tauri/examples/windows_startup_recovery.rs').write_text(text,'utf-8')
+diff --git a/test/science_control_fixture.c b/test/science_control_fixture.c
+index c940043..9baab11 100644
+--- a/test/science_control_fixture.c
++++ b/test/science_control_fixture.c
+@@ -13,6 +13,12 @@ int main(int argc, char **argv) {
+     if (!file) return 92;
+     if (fscanf(file, "%79s %d", scenario, &port) != 2) { fclose(file); return 93; }
+     fclose(file);
++    if (!strncmp(scenario, "mint-", 5)) {
++        if (!strcmp(scenario, "mint-mixed")) printf("private-nonce-must-not-leak\n");
++        fprintf(stderr, "claude-science: couldn't mint a sign-in link for the running daemon \xe2\x80\x94 restart it with 'claude-science stop && claude-science serve'.\n");
++        if (!strcmp(scenario, "mint-extra")) fprintf(stderr, "permission denied; private-nonce-must-not-leak\n");
++        return !strcmp(scenario, "mint-wrong-code") ? 4 : 1;
++    }
+     if (!strcmp(scenario, "not-ready")) {
+         fprintf(stderr, "No daemon running. Start one with `claude-science serve`.\n");
+         return 4;
+diff --git a/test/windows_startup_recovery_main.rs b/test/windows_startup_recovery_main.rs
+new file mode 100644
+index 0000000..f0fbac6
+--- /dev/null
++++ b/test/windows_startup_recovery_main.rs
+@@ -0,0 +1,80 @@
++// Appended to a generated crate-root fixture. All lifecycle modules are the
++// production files; no cfg(test) identity shortcuts or real Science are used.
++fn main() {
++    use std::{fs, io::{Read, Write}, net::{TcpListener, TcpStream}, process::{Command, Stdio}, time::{Duration, Instant}};
++    use crate::platform::CanonicalizeExt;
++    use runtime::science::{ScienceHostAdapter, ScienceVersionCache, SandboxScienceState};
++    let args: Vec<String> = std::env::args().collect();
++    if args.get(1).map(String::as_str) == Some("--version") {
++        println!("claude-science 0.1.60 synthetic"); return;
++    }
++    if args.get(1).map(String::as_str) == Some("stop") { return; } // deliberately dishonest CLI
++    if args.get(1).map(String::as_str) == Some("status") { std::process::exit(1); }
++    if args.get(1).map(String::as_str) == Some("--synthetic-server") {
++        let listener=TcpListener::bind(("127.0.0.1",args[2].parse::<u16>().unwrap())).unwrap();
++        for stream in listener.incoming() {
++            let mut stream=stream.unwrap();
++            stream.set_read_timeout(Some(Duration::from_secs(1))).unwrap();
++            let mut request=[0;1024]; let _=stream.read(&mut request);
++            let _=stream.write_all(b"HTTP/1.1 503 Service Unavailable\r\nContent-Length: 0\r\nConnection: close\r\n\r\n");
++        }
++        return;
++    }
++    let home=std::path::PathBuf::from(std::env::var_os("CSSWITCH_FIXTURE_HOME").expect("isolated HOME required"));
++    assert!(!home.exists(),"fixture must use fresh data");
++    fs::create_dir_all(&home).unwrap();
++    std::env::set_var("HOME",&home);
++    std::env::set_var("USERPROFILE",&home);
++    std::env::set_var("APPDATA",home.join("AppData/Roaming"));
++    std::env::set_var("LOCALAPPDATA",home.join("AppData/Local"));
++    let binary=std::env::current_exe().unwrap().canonicalize_norm().unwrap();
++    std::env::set_var("SCIENCE_BIN",&binary);
++    let socket=TcpListener::bind(("127.0.0.1",0)).unwrap();
++    let port=socket.local_addr().unwrap().port(); drop(socket);
++    assert_ne!(port,8765);
++    let dir=config::default_dir();
++    fs::create_dir_all(dir.join("sandbox/home/.claude-science")).unwrap();
++    let mut cfg=config::Config::default(); cfg.sandbox_port=port;
++    config::save_to(&dir,&cfg).unwrap();
++    let cache=ScienceVersionCache::default();
++    let runtime=runtime::science::select_science_runtime_cached(None,&cache).unwrap();
++    struct OwnedChild(std::process::Child);
++    impl Drop for OwnedChild {fn drop(&mut self){let _=self.0.kill();let _=self.0.wait();}}
++    let mut child=OwnedChild(Command::new(&binary).args(["--synthetic-server",&port.to_string()]).stdin(Stdio::null()).stdout(Stdio::null()).stderr(Stdio::null()).spawn().unwrap());
++    let deadline=Instant::now()+Duration::from_secs(5);
++    while TcpStream::connect(("127.0.0.1",port)).is_err(){assert!(Instant::now()<deadline);std::thread::sleep(Duration::from_millis(30));}
++    assert!(ScienceHostAdapter::recover_owned_runtime(port,&cache).unwrap().is_none());
++    assert!(ScienceHostAdapter::claim_stop(Some(&runtime)).is_err());
++    assert!(child.0.try_wait().unwrap().is_none());
++    println!("PASS: same binary on occupied port without receipt is preserved");
++    let receipt=runtime::science::record_managed_science_launch(port,&runtime).unwrap();
++    assert_eq!(ScienceHostAdapter::probe_known(port,&runtime),SandboxScienceState::Unknown);
++    let recovered=ScienceHostAdapter::recover_owned_runtime(port,&cache).unwrap().expect("unhealthy owned daemon must be recoverable");
++    assert!(ScienceHostAdapter::receipt_is_current(&receipt,&recovered));
++    println!("PASS: unhealthy persisted owner recovers without health/status success");
++    let receipt_path=dir.join("science-managed-launch.v1.json");
++    let original=fs::read(&receipt_path).unwrap();
++    for field in ["process_start","runtime_sha256","data_dir"] {
++        let mut changed:serde_json::Value=serde_json::from_slice(&original).unwrap();
++        changed[field]=serde_json::json!("wrong-owner");
++        fs::write(&receipt_path,serde_json::to_vec(&changed).unwrap()).unwrap();
++        assert!(ScienceHostAdapter::recover_owned_runtime(port,&cache).unwrap().is_none());
++        assert!(ScienceHostAdapter::claim_stop(Some(&runtime)).is_err());
++        assert!(child.0.try_wait().unwrap().is_none());
++        fs::write(&receipt_path,&original).unwrap();
++    }
++    println!("PASS: changed process creation time, executable digest and data directory refuse recovery");
++    let app=tauri::test::mock_builder().build(tauri::test::mock_context(tauri::test::noop_assets())).unwrap();
++    let request=ScienceHostAdapter::claim_stop(Some(&recovered)).unwrap();
++    let (outcome,_)=ScienceHostAdapter::execute_stop(app.handle(),request).into_parts();
++    assert!(outcome.is_ok(),"{outcome:?}");
++    assert!(child.0.try_wait().unwrap().is_some());
++    assert!(TcpStream::connect(("127.0.0.1",port)).is_err());
++    assert!(!receipt_path.exists());
++    println!("PASS: CLI false success falls back to exact owner termination, then verifies exit and clears receipt");
++    let next=TcpListener::bind(("127.0.0.1",port)).unwrap();
++    assert!(ScienceHostAdapter::recover_owned_runtime(port,&cache).unwrap().is_none());
++    assert!(ScienceHostAdapter::claim_stop(Some(&runtime)).is_err());
++    drop(next);
++    println!("PASS: subsequent foreign listener is preserved; port is available for a fresh start");
++}

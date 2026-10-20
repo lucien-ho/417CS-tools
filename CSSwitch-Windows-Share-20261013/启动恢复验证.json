@@ -1,0 +1,29 @@
+{
+  "package": "0.8.4-winshare.20261020.2",
+  "sourceCommit": "d03a756490e347edd8f6fee8501fee796e99e7c4",
+  "sourceBaseline": "8d2d4fd77acc129f3397761f3c2cdedbfa48fb9e",
+  "desktopSha256": "f39284bf1c635fd26f010cd07ed64769e75f859c6fe753b64861a4a4ececb967",
+  "controlIntegrationTests": {
+    "passed": 7,
+    "failed": 0
+  },
+  "nativeProcessChecks": {
+    "unownedListenerPreserved": true,
+    "unhealthyOwnedListenerRecovered": true,
+    "creationTimeDigestDataDirMismatchRejected": true,
+    "falseSuccessfulStopTerminatedExactOwner": true,
+    "exitAndPortClosureVerified": true,
+    "replacementListenerPreserved": true
+  },
+  "independentReview": "PASS; clean-context YES; no scoped findings",
+  "localInstalledStartup": {
+    "success": true,
+    "durationMs": 43494,
+    "scienceControlStatus": "healthy",
+    "scienceVersion": "0.1.60",
+    "scienceBinaryUnchanged": true,
+    "scienceSha256": "b9339c9c49891dea244e8a62c03aadc65864c0993988eefb4e4d3a206057ff5e"
+  },
+  "realModelInferenceTested": false,
+  "secondComputerVerified": false
+}
